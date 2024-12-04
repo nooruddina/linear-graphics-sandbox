@@ -63,9 +63,9 @@ int main() {
 	//  X   , Y   , Z
 		0.0f, 0.0f, 0.0f, //1.0f, 1.0f, 1.0f,
 
-		1.0f, 0.0f, 0.0f, //1.0f, 0.0f, 1.0f,
+		0.5f, 0.0f, 0.0f, //1.0f, 0.0f, 1.0f,
 		
-		1.0f, 1.0f, 0.0f//, 1.0f, 0.0f, 0.0f
+		0.5f, 0.5f, 0.0f//, 1.0f, 0.0f, 0.0f
 	};
 
 	unsigned int VAO, VBO;
@@ -117,6 +117,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 
 		auto start_time = std::chrono::high_resolution_clock::now(); //time at start of loop
+
 		// process input
 		processInput(window);
 
@@ -127,8 +128,7 @@ int main() {
 		// render
 		glm::mat4 rotating = glm::mat4(1.0f);
 
-		i++;
-
+			
 		if (int(i) % 180 == 0) {
 			flip *= -1;
 			i = 0;
@@ -156,6 +156,7 @@ int main() {
 
 		//sleep the remaining time to stay for 16.67 ms per loop
 		std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
+		i++;
 	}
 
 	glfwTerminate();
