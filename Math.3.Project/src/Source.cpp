@@ -28,7 +28,7 @@ float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;
 int val = 1;
 bool firstEntry = true;
 Camera myCamera(glm::vec3(1.0f, 0.5f, 4.0f));
-glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+//glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 
 int main() {
 
@@ -50,7 +50,7 @@ int main() {
 		return -1;
 	}
 
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -58,32 +58,96 @@ int main() {
 
 	glfwSetScrollCallback(window, scroll_callback);
 
+	// bind the required vao and then activate the required shader object then draw the object
+	float vertices2D[]{
+			//  X   , Y   , Z
+			0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-	float vertices[]{
-	//  X   , Y   , Z
-		0.0f, 0.0f, 0.0f, //1.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
-		0.5f, 0.0f, 0.0f, //1.0f, 0.0f, 1.0f,
-		
-		0.5f, 0.5f, 0.0f//, 1.0f, 0.0f, 0.0f
+			1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
 	};
-
-	unsigned int VAO, VBO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	//float vertices3D[]
+	unsigned int VAO2D, VBO, VAO3D,	VBO3D;
+	glGenVertexArrays(1, &VAO2D);
+	glBindVertexArray(VAO2D);
 	// create a buffer on the gpu(vram)
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// allocate the size of the buffer and send the data of that buffer and set the nature of the access of that data
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2D), vertices2D, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*) 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 6 * sizeof(float), (void*)12);
+	glEnableVertexAttribArray(1);
+	
+	float vertices3D[] = {
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f, 
+		0.5f, 0.5f, -0.5f,
+		0.5f, 0.5f, -0.5f, 
+		- 0.5f, 0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f, 
+		-0.5f, -0.5f, 0.5f,
+		0.5f, -0.5f, 0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f, 0.5f, 
+		-0.5f, -0.5f, 0.5f,
+		-0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f, -0.5f, 
+		-0.5f, -0.5f, -0.5f, 
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, 0.5f, 
+		-0.5f, 0.5f, 0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		0.5f, 0.5f, -0.5f, 
+		0.5f, -0.5f, -0.5f, 
+		0.5f, -0.5f, -0.5f, 
+		0.5f, -0.5f, 0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		-0.5f, -0.5f, -0.5f, 
+		0.5f, -0.5f, -0.5f, 
+		0.5f, -0.5f, 0.5f, 
+		0.5f, -0.5f, 0.5f, 
+		-0.5f, -0.5f, 0.5f, 
+		-0.5f, -0.5f, -0.5f, 
+		0.5f, 0.5f, -0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f, 0.5f, 
+		-0.5f, 0.5f, -0.5f
+	};
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f, 5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f, 3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f, 2.0f, -2.5f),
+		glm::vec3(1.5f, 0.2f, -1.5f),
+		glm::vec3(-1.3f, 1.0f, -1.5f)
+	};
+	glGenVertexArrays(1, &VAO3D);
+	glBindVertexArray(VAO3D);
+	// create a buffer on the gpu(vram)
+	glGenBuffers(1, &VBO3D);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO3D);
+
+	// allocate the size of the buffer and send the data of that buffer and set the nature of the access of that data
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices3D), vertices3D, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	Shader sh("C:/Users/noore/Downloads/Math3.Project-main/Math3.Project-main/Math.3.Project/resources/shaders/vertexShader.shader", "C:/Users/noore/Downloads/Math3.Project-main/Math3.Project-main/Math.3.Project/resources/shaders/fragmentShader.shader");
 
-	sh.use();
+	Shader shader2D("..\\Math.3.Project\\resources\\shaders\\vertexShader2D.shader", "..\\Math.3.Project\\resources\\shaders\\fragmentShader2D.shader");
+	Shader shader3D("..\\Math.3.Project\\resources\\shaders\\vertexShader3D.shader", "..\\Math.3.Project\\resources\\shaders\\fragmentShader3D.shader");
+
 	glViewport(0, 0, 800, 600);
 
 
@@ -92,11 +156,11 @@ int main() {
 	// transformations are commutative, but in this specifc test case translate(scale(x)) = scale(translate(x)), how?
 	model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(1.0f, -1.0f, 1.0f));
-	
+
 	// fs(fu(x)) = fs(x + u) = ax + au
 	// fu(fs(x)) = fu(ax) = ax + u, how are they equal???  ----> au must equal u
 	// u = (-0.5f, 0.0f, 0.0f), a = (1.0f, -1.0f, 1.0f), a * u = (-0.5, 0.0f, 0.0f) = u
-	
+
 	// also what happens is:
 	// model * vec = Identity * translate * scale * vec
 	// not model = trans * model; this doesn't happen!
@@ -106,46 +170,77 @@ int main() {
 
 	// rotates around an axis (in 2d it is always the z axis ) with a given angle (radians);
 	rot = glm::rotate(rot, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	
-//______________________________________________________
+
+	//______________________________________________________
 
 	auto last_time = std::chrono::high_resolution_clock::now();
 	const double target_frame_time = 1.0 / 60.0; // (16.67ms) for every frame = ~60 FPS
+
+	glEnable(GL_DEPTH_TEST);
 
 	int flip = 1;
 	float i = 1;
 	while (!glfwWindowShouldClose(window)) {
 
-		auto start_time = std::chrono::high_resolution_clock::now(); //time at start of loop
-
 		// process input
 		processInput(window);
 
 		// set the color of the background of the window
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-
+		glClearColor(0.82f, 0.71f, 0.55f, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		// render
+
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame, lastFrame = currentFrame;
+		
+		float t = glfwGetTime();
+
+		glm::mat4 view = myCamera.getViewMatrix();
+		glm::mat4 projection = glm::perspective(myCamera.m_Zoom, 800.0f / 600.0f, 0.1f, 100.0f);
+		glBindVertexArray(VAO3D);
+		shader3D.use();
+		shader3D.setMatrix4f("view", false, glm::value_ptr(view));
+		shader3D.setMatrix4f("projection", false, glm::value_ptr(projection));
+
+		for (int i{ 0 }; i < 10; i++) {
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			model = glm::rotate(model, glm::radians(100 * t), glm::vec3(0.0f, 1.0f, 0.0f));
+			shader3D.setMatrix4f("model", false, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+
+
+
+
+
+
+
+
+
+		// 2D
+		/*
+		auto start_time = std::chrono::high_resolution_clock::now(); //time at start of loop
+
 		glm::mat4 rotating = glm::mat4(1.0f);
 
 			
 		if (int(i) % 180 == 0) {
 			flip *= -1;
 			i = 0;
-			std::cout << flip << '\n';
-			std::cout << i << '\n';
 		}
 
 		//rotating = glm::rotate(rotating, glm::radians(flip * 30 * t), glm::vec3(0.0f, 0.0f, 1.0f));
-		rotating = glm::rotate(rotating, glm::radians(flip * i * 2 ), glm::vec3(0.0f, 0.0f, 1.0f));
+		rotating = glm::rotate(rotating, glm::radians(flip * i * 2), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		
+
 		sh.setMatrix4f("model", false, glm::value_ptr(rotating));
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-		
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+
+		
 
 		// Frame time management
 		auto end_time = std::chrono::high_resolution_clock::now();
@@ -156,7 +251,9 @@ int main() {
 
 		//sleep the remaining time to stay for 16.67 ms per loop
 		std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
-		i++;
+		*/
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
 	glfwTerminate();
