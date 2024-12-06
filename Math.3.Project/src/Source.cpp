@@ -30,6 +30,8 @@ bool firstEntry = true;
 Camera myCamera(glm::vec3(1.0f, 0.5f, 4.0f));
 //glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 
+float Gwidth = SCR_WIDTH, Gheight = SCR_HEIGHT;
+
 int main() {
 
 	glfwInit();
@@ -50,7 +52,7 @@ int main() {
 		return -1;
 	}
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -60,12 +62,12 @@ int main() {
 
 	// bind the required vao and then activate the required shader object then draw the object
 	float vertices2D[]{
-			//  X   , Y   , Z
-			0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			//  X   , Y   , Z			RGB
+			0.0f, 0.0f, 0.0f,	 1.0f, 0.0f, 0.0f,
 
-			1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.5f, 0.0f, 0.0f,	 0.0f, 1.0f, 0.0f,
 
-			1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f
+			0.5f, 0.5f, 0.0f,	0.0f, 0.0f, 1.0f
 	};
 	//float vertices3D[]
 	unsigned int VAO2D, VBO, VAO3D,	VBO3D;
@@ -153,8 +155,8 @@ int main() {
 
 	glm::mat4 model = glm::mat4(1.0f);
 
-	// transformations are commutative, but in this specifc test case translate(scale(x)) = scale(translate(x)), how?
-	model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
+	// transformations are not commutative, but in this specifc test case translate(scale(x)) = scale(translate(x)), how?
+	model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f)); //lec4 36- 42
 	model = glm::scale(model, glm::vec3(1.0f, -1.0f, 1.0f));
 
 	// fs(fu(x)) = fs(x + u) = ax + au
@@ -165,13 +167,16 @@ int main() {
 	// model * vec = Identity * translate * scale * vec
 	// not model = trans * model; this doesn't happen!
 
-//______________________________________________________
+	//______________________________________________________
 	glm::mat4 rot = glm::mat4(1.0f);
 
 	// rotates around an axis (in 2d it is always the z axis ) with a given angle (radians);
 	rot = glm::rotate(rot, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	//______________________________________________________
+	
+	glBindVertexArray(VAO2D);
+	shader2D.use();
 
 	auto last_time = std::chrono::high_resolution_clock::now();
 	const double target_frame_time = 1.0 / 60.0; // (16.67ms) for every frame = ~60 FPS
@@ -186,72 +191,121 @@ int main() {
 		processInput(window);
 
 		// set the color of the background of the window
-		glClearColor(0.82f, 0.71f, 0.55f, 1.0);
+		glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
+		//glClearColor(1.0f, 1.0f, 1.0f, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		// render
+		// render the following
 
+		//2D static
+		/*
+		shader2D.use(); // Use the 2D shader
+		 //Create and apply transformations
+		glm::mat4 model = glm::mat4(1.0f); // Identity matrix
+			//Apply translation
+		//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate 90 degrees around the Z-axis
+		//model = glm::scale(model, glm::vec3(1.0f, -1.0f, 1.0f)); // Flip the triangle vertically
+		//model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f)); // Move the triangle along the X-axis
+			//Set the model matrix in the shader
+		shader2D.setMatrix4f("model", false, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		*/
+
+
+
+
+
+		// 2D rotating
+
+		
+		/*
+		auto start_time = std::chrono::high_resolution_clock::now(); //time at start of loop
+		glm::mat4 rotating = glm::mat4(1.0f);
+	
+		if (int(i) % 180 == 0) {
+			flip *= -1;
+			i = 0;
+		}
+		//rotating = glm::rotate(rotating, glm::radians(flip * 30 * t), glm::vec3(0.0f, 0.0f, 1.0f));
+		rotating = glm::rotate(rotating, glm::radians(flip * i * 2), glm::vec3(0.0f, 0.0f, 1.0f));		
+		shader2D.setMatrix4f("model", false, glm::value_ptr(rotating));
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// Frame time management
+		auto end_time = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> elapsed = end_time - start_time;
+		// Calculate sleep time to achieve 60 FPS
+		double sleep_time = target_frame_time - elapsed.count();
+		//sleep the remaining time to stay for 16.67 ms per loop
+		std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
+		i++; 
+		*/
+		
+
+
+
+
+
+		// 3D geenral
+		/*	we have :
+			eye (camera position): Where the camera is located in world space.
+			target: The point the camera is looking at.
+			up: The world’s "up" direction
+
+			and we need to calc the 3 basis vectors -> cuz if we know how camera is supposed to be oriented, we can inverse that and apply it to the world
+			i-hat: Represents right direction of the camera.
+			j-hat: Represents up (vertical axis).
+			k-hat: front direction of the camera negative Z-axis in view space
+			these are the camera's local axes. apply their inverse to get the same for the world
+
+			to get k-hat = normalize(eye - target).
+			i-hat is perp. up vector and k-hat. -> so we cross product and get it -> i-hat = normalize(cross(up, k-hat)).
+			same for j-hat = cross(k-hat, i-hat).
+			since rotations are orthogonal, it's transpose is the inverse
+
+*/
+
+
+
+
+		/*
 		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame, lastFrame = currentFrame;
-		
+
 		float t = glfwGetTime();
 
 		glm::mat4 view = myCamera.getViewMatrix();
-		glm::mat4 projection = glm::perspective(myCamera.m_Zoom, 800.0f / 600.0f, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(myCamera.m_Zoom, Gwidth / Gheight, 0.1f, 100.0f);
 		glBindVertexArray(VAO3D);
 		shader3D.use();
 		shader3D.setMatrix4f("view", false, glm::value_ptr(view));
 		shader3D.setMatrix4f("projection", false, glm::value_ptr(projection));
+		*/
 
-		for (int i{ 0 }; i < 10; i++) {
+
+		// Render a single 3D shape - with translane on z and continuos rotation
+
+		/*
+		glm::mat4 model = glm::mat4(1.0f); // Identity matrix
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f)); // Move the shape back along the Z-axis
+		model = glm::rotate(model, glm::radians(50.0f * t), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate around the Y-axis
+		shader3D.setMatrix4f("model", false, glm::value_ptr(model)); // Set the model matrix in the shader
+		glDrawArrays(GL_TRIANGLES, 0, 36); // Render the shape
+		*/
+
+		//3D multiple shapes rotating
+
+			
+		/*	for (int i{ 0 }; i < 10; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
 			model = glm::rotate(model, glm::radians(100 * t), glm::vec3(0.0f, 1.0f, 0.0f));
 			shader3D.setMatrix4f("model", false, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-
-
-
-
-
-
-
-
-
-		// 2D
-		/*
-		auto start_time = std::chrono::high_resolution_clock::now(); //time at start of loop
-
-		glm::mat4 rotating = glm::mat4(1.0f);
-
-			
-		if (int(i) % 180 == 0) {
-			flip *= -1;
-			i = 0;
-		}
-
-		//rotating = glm::rotate(rotating, glm::radians(flip * 30 * t), glm::vec3(0.0f, 0.0f, 1.0f));
-		rotating = glm::rotate(rotating, glm::radians(flip * i * 2), glm::vec3(0.0f, 0.0f, 1.0f));
-
-
-		sh.setMatrix4f("model", false, glm::value_ptr(rotating));
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		}*/
 
 		
 
-		// Frame time management
-		auto end_time = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> elapsed = end_time - start_time;
-
-		// Calculate sleep time to achieve 60 FPS
-		double sleep_time = target_frame_time - elapsed.count();
-
-		//sleep the remaining time to stay for 16.67 ms per loop
-		std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
-		*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -262,6 +316,8 @@ int main() {
 }
 
 void framebuffer_size_callback(GLFWwindow* win, int width, int height) {
+	Gheight = height;
+	Gwidth = width;
 	glViewport(0, 0, width, height);
 }
 
